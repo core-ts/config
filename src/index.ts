@@ -1,7 +1,5 @@
 import ProcessEnv = NodeJS.ProcessEnv;
 
-const r1 = /^[1-9]\d*$/;
-
 export function merge<T>(conf: T, env: ProcessEnv, extEnv?: any, envName?: string): T {
   if (!extEnv || !envName || envName.length === 0) {
     return mergeEnv(conf, env);
@@ -76,7 +74,7 @@ export function mergeWithPath<T>(c: T, env: ProcessEnv, parentPath?: string): T 
         }
         break;
       case 'number':
-        if (envValue && envValue.length > 0 && r1.test(envValue)) {
+        if (envValue && envValue.length > 0 && !isNaN(envValue)) {
           conf[key] = Number(envValue);
         }
         break;
