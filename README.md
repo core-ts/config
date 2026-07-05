@@ -1,25 +1,48 @@
 # config-plus
 
-A lightweight TypeScript library for merging application configuration from multiple sources.
+A lightweight TypeScript library for merging configuration from multiple sources:
+1. Default Configuration
+2. Environment-specific Configuration (DEV, SIT, UAT, PROD)
+3. Environment Variables (process.env)
 
-The library is designed for Node.js applications and supports hierarchical configuration with environment variable overrides.
+Configuration is merged in the following order:
+
+```text
+          Default Configuration
+                   │
+                   ▼
+Environment Configuration (SIT, UAT, PROD)
+                   │
+                   ▼
+   Environment Variables (process.env)
+                   │
+                   ▼
+          Final Configuration
+```
+
+Environment variables always have the highest priority
+
+---
 
 ## Features
+- Recursive config merging
+- Environment-specific overrides (SIT, UAT, PROD)
+- Environment variables overrides (process.env)
 
+---
+
+## Strengths
 * 🚀 Zero dependencies
 * 📦 Lightweight and fast
 * 🔷 Written in TypeScript
+* 🔒 Strongly typed API
 * 🔄 Deep object merge
-* 🌳 Nested configuration support
 * ✅ Automatic parsing of:
   - string
   - number
   - boolean
   - array (JSON)
-* 🌍 Environment-specific configuration
-* ⚙️ Automatic mapping from environment variables
 * 📋 Array override support
-* 🔒 Strongly typed API
 
 ---
 
@@ -48,26 +71,34 @@ For example:
 ```ts
 export const config = {
   server: {
-    port: 8080,
-    host: "localhost"
+    port: 8000,
+    host: "localhost",
   },
   database: {
     host: "localhost",
-    port: 5432
-  }
-};
+    port: 5432,
+  },
+}
 ```
 
-2. Production overrides
+2. SIT overrides and PRD overrides for the configuration
 
 ```ts
-export const environments = {
-  production: {
+export const env = {
+  uat: {
     server: {
-      port: 80
-    }
-  }
-};
+      port: 8080,
+    },
+  },
+  prd: {
+    server: {
+      port: 80,
+    },
+    database: {
+      port: 5431,
+    },
+  },
+}
 ```
 
 3. Environment variables
@@ -81,50 +112,48 @@ The library automatically combines all of them into a single configuration objec
 
 ---
 
-## Merge Priority
-
-Configuration is merged in the following order:
-
-```text
-Default Configuration
-        │
-        ▼
-Environment Configuration
-        │
-        ▼
-Environment Variables
-```
-
-Later sources always override earlier ones.
-
----
-
 ## Quick Start
 
 ```ts
-import { merge } from "config-plus";
+import { merge } from "config-plus"
 
-const config = {
+export const config = {
   server: {
+    port: 8000,
     host: "localhost",
-    port: 8080
-  }
-};
+  },
+  database: {
+    host: "localhost",
+    port: 5432,
+  },
+}
 
-const environments = {
-  production: {
+// SIT overrides and PRD overrides for the configuration
+export const env = {
+  uat: {
     server: {
-      port: 80
-    }
-  }
-};
+      port: 8080,
+    },
+  },
+  prd: {
+    server: {
+      port: 80,
+    },
+    database: {
+      port: 5431,
+    },
+  },
+}
 
-const result = merge(
-  config,
-  process.env,
-  environments,
-  "production"
-);
+const cfg = merge(config, process.env, env, process.env.ENV)
+
+```
+
+when
+
+```text
+ENV=prd
+SERVER_PORT=443
 ```
 
 Result:
@@ -134,14 +163,12 @@ Result:
   server: {
     host: "localhost",
     port: 443
+  },
+  database: {
+    host: "localhost",
+    port: 5431
   }
 }
-```
-
-when
-
-```text
-SERVER_PORT=443
 ```
 
 ---
@@ -151,12 +178,7 @@ SERVER_PORT=443
 ## merge()
 
 ```ts
-merge<T>(
-    config: T,
-    env: ProcessEnv,
-    environments?: object,
-    environmentName?: string
-): T
+merge<T>(config: T, env: ProcessEnv, environments?: object, environmentName?: string): T
 ```
 
 Merges:
@@ -168,12 +190,7 @@ Merges:
 Example
 
 ```ts
-const config = merge(
-    defaults,
-    process.env,
-    environments,
-    "production"
-);
+const config = merge(defaults, process.env, environments, "sit");
 ```
 
 ---
@@ -415,23 +432,6 @@ Result
 
 ---
 
-## How It Works
-
-```text
-                Default Config
-                       │
-                       ▼
-          Environment-specific Config
-                       │
-                       ▼
-             process.env Overrides
-                       │
-                       ▼
-              Final Configuration
-```
-
----
-
 ## Best Practices
 
 * Keep default values in your configuration file.
@@ -446,8 +446,6 @@ Result
 
 Current implementation does not support:
 
-- floating-point numbers
-- negative numbers
 - custom value parsers
 - enum parsing
 - Date objects
@@ -457,3 +455,7 @@ Current implementation does not support:
 These features may be added in future versions.
 
 ---
+
+## License
+
+MIT

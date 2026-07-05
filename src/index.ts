@@ -1,26 +1,26 @@
 import ProcessEnv = NodeJS.ProcessEnv;
 
-export function merge<T>(conf: T, env: ProcessEnv, extEnv?: any, envName?: string): T {
+export function merge<T>(cfg: T, env: ProcessEnv, extEnv?: any, envName?: string): T {
   if (!extEnv || !envName || envName.length === 0) {
-    return mergeEnv(conf, env);
+    return mergeEnv(cfg, env);
   } else {
     const x = extEnv[envName];
     if (x) {
-      const c2 = mergeEnvironments(conf, extEnv[envName]);
+      const c2 = mergeEnvironments(cfg, extEnv[envName]);
       return mergeEnv(c2, env);
     } else {
-      return mergeEnv(conf, env);
+      return mergeEnv(cfg, env);
     }
   }
 }
-export function mergeEnvironments<T>(c: T, conf2?: any): T {
-  if (!conf2) {
-    return c;
+export function mergeEnvironments<T>(cfg: T, cfgEnv?: any): T {
+  if (!cfgEnv) {
+    return cfg;
   }
-  const conf: any = c;
-  const keys = Object.keys(conf2);
+  const conf: any = cfg;
+  const keys = Object.keys(cfgEnv);
   for (const key of keys) {
-    const o2 = conf2[key];
+    const o2 = cfgEnv[key];
     switch (typeof o2) {
       case 'object':
         if (Array.isArray(o2)) {
@@ -41,11 +41,11 @@ export function mergeEnvironments<T>(c: T, conf2?: any): T {
   }
   return conf;
 }
-export function mergeEnv<T>(conf: T, env: ProcessEnv): T {
-  return mergeWithPath({ ...conf }, env, undefined);
+export function mergeEnv<T>(cfg: T, env: ProcessEnv): T {
+  return mergeWithPath({ ...cfg }, env, undefined);
 }
-export function mergeWithPath<T>(c: T, env: ProcessEnv, parentPath?: string): T {
-  const conf: any = c;
+export function mergeWithPath<T>(cfg: T, env: ProcessEnv, parentPath?: string): T {
+  const conf: any = cfg;
   const keys = Object.keys(conf);
   for (const key of keys) {
     const envKey = buildFullPathEnv(key, parentPath);
@@ -67,7 +67,7 @@ export function mergeWithPath<T>(c: T, env: ProcessEnv, parentPath?: string): T 
               }
             }
           } catch (e) {
-            console.log('Can\'t parse value of ' + envKey + ' env', e);
+            console.log("Can't parse value of " + envKey + ' env', e);
           }
         } else if (conf[key] !== null) {
           conf[key] = mergeWithPath(conf[key], env, envKey);
@@ -80,7 +80,7 @@ export function mergeWithPath<T>(c: T, env: ProcessEnv, parentPath?: string): T 
         break;
       case 'boolean':
         if (envValue) {
-          const nv = (env[envKey] === 'true');
+          const nv = env[envKey] === 'true';
           if (nv !== conf[key]) {
             conf[key] = nv;
           }
@@ -100,5 +100,5 @@ function buildFullPathEnv(key: string, parentPath?: string): string {
   }
 }
 function isEmpty(s?: string): boolean {
-  return (!s || s === '');
+  return !s || s === '';
 }
