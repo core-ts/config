@@ -1,6 +1,12 @@
 import ProcessEnv = NodeJS.ProcessEnv
 
-export function merge<T>(cfg: T, env: ProcessEnv, extEnv?: any, envName?: string): T {
+export interface StringMap {
+  [key: string]: any
+}
+export interface PartialMap<T extends StringMap> {
+  [key: string]: Partial<T>
+}
+export function merge<T extends StringMap>(cfg: T, env: ProcessEnv, extEnv?: PartialMap<T>, envName?: string): T {
   if (!extEnv || !envName || envName.length === 0) {
     return mergeEnv(cfg, env)
   } else {
@@ -13,7 +19,7 @@ export function merge<T>(cfg: T, env: ProcessEnv, extEnv?: any, envName?: string
     }
   }
 }
-export function mergeEnvironments<T>(cfg: T, cfgEnv?: any): T {
+export function mergeEnvironments<T extends StringMap>(cfg: T, cfgEnv?: Partial<T>): T {
   if (!cfgEnv) {
     return cfg
   }
@@ -41,10 +47,10 @@ export function mergeEnvironments<T>(cfg: T, cfgEnv?: any): T {
   }
   return conf
 }
-export function mergeEnv<T>(cfg: T, env: ProcessEnv): T {
+export function mergeEnv<T extends StringMap>(cfg: T, env: ProcessEnv): T {
   return mergeWithPath({ ...cfg }, env, undefined)
 }
-export function mergeWithPath<T>(cfg: T, env: ProcessEnv, parentPath?: string): T {
+export function mergeWithPath<T extends StringMap>(cfg: T, env: ProcessEnv, parentPath?: string): T {
   const conf: any = cfg
   const keys = Object.keys(conf)
   for (const key of keys) {
@@ -74,7 +80,7 @@ export function mergeWithPath<T>(cfg: T, env: ProcessEnv, parentPath?: string): 
         }
         break
       case "number":
-        if (envValue && envValue.length > 0 && !isNaN(envValue)) {
+        if (envValue && envValue.length > 0 && !isNaN(envValue as any)) {
           conf[key] = Number(envValue)
         }
         break
