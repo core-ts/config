@@ -1,18 +1,18 @@
 import ProcessEnv = NodeJS.ProcessEnv
 
-export interface StringMap {
+interface StringMap {
   [key: string]: any
 }
-export interface PartialMap<T extends StringMap> {
-  [key: string]: Partial<T>
+interface PartialMap {
+  [key: string]: any
 }
-export function merge<T extends StringMap>(cfg: T, env: ProcessEnv, extEnv?: PartialMap<T>, envName?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
-  if (!extEnv || !envName || envName.length === 0) {
+export function merge<T extends StringMap>(cfg: T, env: ProcessEnv, environments?: PartialMap, environmentName?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
+  if (!environments || !environmentName || environmentName.length === 0) {
     return mergeEnv(cfg, env, logError, logInfo)
   } else {
-    const x = extEnv[envName]
+    const x = environments[environmentName]
     if (x) {
-      const c2 = mergeEnvironments(cfg, extEnv[envName], logError, logInfo)
+      const c2 = mergeEnvironments(cfg, environments[environmentName], logError, logInfo)
       return mergeEnv(c2, env, logError, logInfo)
     } else {
       return mergeEnv(cfg, env, logError, logInfo)

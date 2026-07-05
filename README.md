@@ -2,7 +2,7 @@
 
 A lightweight TypeScript library for merging configuration from multiple sources:
 1. Default Configuration
-2. Environment-specific Configuration (DEV, SIT, UAT, PROD)
+2. Environment Configuration (SIT, UAT, PRD)
 3. Environment Variables (process.env)
 
 Configuration is merged in the following order:
@@ -11,7 +11,7 @@ Configuration is merged in the following order:
           Default Configuration
                    │
                    ▼
-Environment Configuration (SIT, UAT, PROD)
+Environment Configuration (SIT, UAT, PRD)
                    │
                    ▼
    Environment Variables (process.env)
@@ -26,7 +26,7 @@ Environment variables always have the highest priority
 
 ## Features
 - Recursive config merging
-- Environment-specific overrides (SIT, UAT, PROD)
+- Environment overrides (SIT, UAT, PRD)
 - Environment variables overrides (process.env)
 
 ---
@@ -81,7 +81,7 @@ export const config = {
 }
 ```
 
-2. SIT overrides and PRD overrides for the configuration
+2. UAT overrides and PRD overrides for the configuration
 
 ```ts
 export const env = {
@@ -145,27 +145,27 @@ export const env = {
   },
 }
 
-const cfg = merge(config, process.env, env, process.env.ENV)
+const cfg = merge(config, process.env, env, "prd")
 
 ```
 
 when
 
 ```text
-ENV=prd
 SERVER_PORT=443
+DATABASE_HOST=db.company.com
 ```
 
 Result:
 
-```ts
+```js
 {
   server: {
     host: "localhost",
     port: 443
   },
   database: {
-    host: "localhost",
+    host: "db.company.com",
     port: 5431
   }
 }
@@ -178,19 +178,26 @@ Result:
 ## merge()
 
 ```ts
-merge<T>(config: T, env: ProcessEnv, environments?: object, environmentName?: string): T
+merge(
+  config: { [key: string]: any },
+  env: ProcessEnv,
+  environments?: { [key: string]: { [key: string]: any } },
+  environmentName?: string,
+  logError?: (msg: string) => void,
+  logInfo?: (msg: string) => void,
+): { [key: string]: any };
 ```
 
 Merges:
 
 * default configuration
-* environment-specific configuration
+* environment configuration (SIT, UAT, PRD)
 * process environment variables
 
 Example
 
 ```ts
-const config = merge(defaults, process.env, environments, "sit");
+const config = merge(defaults, process.env, environments, "uat")
 ```
 
 ---
@@ -397,7 +404,7 @@ const defaults = {
 };
 
 const environments = {
-    production: {
+    uat: {
         server: {
             port: 80
         }
@@ -407,12 +414,7 @@ const environments = {
 process.env.SERVER_HOST = "0.0.0.0";
 process.env.DATABASE_HOST = "db.company.com";
 
-const config = merge(
-    defaults,
-    process.env,
-    environments,
-    "production"
-);
+const config = merge(defaults, process.env, environments, "uat");
 ```
 
 Result
