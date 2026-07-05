@@ -1,6 +1,6 @@
 {
   "name": "config-plus",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Merge 2 configurations, merge configuration with environment variables",
   "main": "./lib/index.js",
   "types": "./src/index.ts",

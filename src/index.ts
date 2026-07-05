@@ -6,20 +6,20 @@ export interface StringMap {
 export interface PartialMap<T extends StringMap> {
   [key: string]: Partial<T>
 }
-export function merge<T extends StringMap>(cfg: T, env: ProcessEnv, extEnv?: PartialMap<T>, envName?: string): T {
+export function merge<T extends StringMap>(cfg: T, env: ProcessEnv, extEnv?: PartialMap<T>, envName?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
   if (!extEnv || !envName || envName.length === 0) {
-    return mergeEnv(cfg, env)
+    return mergeEnv(cfg, env, logError, logInfo)
   } else {
     const x = extEnv[envName]
     if (x) {
-      const c2 = mergeEnvironments(cfg, extEnv[envName])
-      return mergeEnv(c2, env)
+      const c2 = mergeEnvironments(cfg, extEnv[envName], logError, logInfo)
+      return mergeEnv(c2, env, logError, logInfo)
     } else {
-      return mergeEnv(cfg, env)
+      return mergeEnv(cfg, env, logError, logInfo)
     }
   }
 }
-export function mergeEnvironments<T extends StringMap>(cfg: T, cfgEnv?: Partial<T>): T {
+export function mergeEnvironments<T extends StringMap>(cfg: T, cfgEnv?: Partial<T>, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
   if (!cfgEnv) {
     return cfg
   }
@@ -34,7 +34,7 @@ export function mergeEnvironments<T extends StringMap>(cfg: T, cfgEnv?: Partial<
         } else {
           const o1 = conf[key]
           if (o1 && typeof o1 === "object" && !Array.isArray(o1)) {
-            mergeEnvironments(o1, o2)
+            mergeEnvironments(o1, o2, logError, logInfo)
           }
         }
         break
@@ -47,10 +47,10 @@ export function mergeEnvironments<T extends StringMap>(cfg: T, cfgEnv?: Partial<
   }
   return conf
 }
-export function mergeEnv<T extends StringMap>(cfg: T, env: ProcessEnv): T {
-  return mergeWithPath({ ...cfg }, env, undefined)
+export function mergeEnv<T extends StringMap>(cfg: T, env: ProcessEnv, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
+  return mergeWithPath({ ...cfg }, env, undefined, logError, logInfo)
 }
-export function mergeWithPath<T extends StringMap>(cfg: T, env: ProcessEnv, parentPath?: string): T {
+export function mergeWithPath<T extends StringMap>(cfg: T, env: ProcessEnv, parentPath?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
   const conf: any = cfg
   const keys = Object.keys(conf)
   for (const key of keys) {
@@ -59,7 +59,9 @@ export function mergeWithPath<T extends StringMap>(cfg: T, env: ProcessEnv, pare
     switch (typeof conf[key]) {
       case "string":
         if (envValue && envValue.length > 0) {
-          // console.log('Override by environment parameter: ' + envKey);
+          if (logInfo) {
+            logInfo(`Override by environment parameter: ${envKey}`)
+          }
           conf[key] = envValue
         }
         break
@@ -72,16 +74,22 @@ export function mergeWithPath<T extends StringMap>(cfg: T, env: ProcessEnv, pare
                 conf[key] = newArray
               }
             }
-          } catch (e) {
-            console.log("Can't parse value of " + envKey + " env", e)
+          } catch (err) {
+            const log = logError ? logError : console.log
+            log(`Can't parse value of "${envKey}" env. Error: ${toString(err)}`)
           }
         } else if (conf[key] !== null) {
-          conf[key] = mergeWithPath(conf[key], env, envKey)
+          conf[key] = mergeWithPath(conf[key], env, envKey, logError, logInfo)
         }
         break
       case "number":
-        if (envValue && envValue.length > 0 && !isNaN(envValue as any)) {
-          conf[key] = Number(envValue)
+        if (envValue && envValue.length > 0) {
+          if (!isNaN(envValue as any)) {
+            conf[key] = Number(envValue)
+          } else {
+            const log = logError ? logError : console.log
+            log(`Invalid number value for "${envKey}" env: ${envValue}`)
+          }
         }
         break
       case "boolean":
@@ -107,4 +115,11 @@ function buildFullPathEnv(key: string, parentPath?: string): string {
 }
 function isEmpty(s?: string): boolean {
   return !s || s === ""
+}
+function toString(v: any): string {
+  if (typeof v === "string") {
+    return v
+  } else {
+    return JSON.stringify(v)
+  }
 }
