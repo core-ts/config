@@ -3,8 +3,10 @@ import ProcessEnv = NodeJS.ProcessEnv
 interface StringMap {
   [key: string]: any
 }
-
-export function merge(cfg: { [key: string]: any }, env: ProcessEnv, environments?: { [key: string]: { [key: string]: any } }, environmentName?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): { [key: string]: any } {
+interface PartialMap {
+  [key: string]: any
+}
+export function merge<T extends StringMap>(cfg: T, env: ProcessEnv, environments?: PartialMap, environmentName?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
   if (!environments || !environmentName || environmentName.length === 0) {
     return mergeEnv(cfg, env, logError, logInfo)
   } else {
@@ -17,7 +19,7 @@ export function merge(cfg: { [key: string]: any }, env: ProcessEnv, environments
     }
   }
 }
-export function mergeEnvironments(cfg: { [key: string]: any }, cfgEnv?: { [key: string]: any }, logError?: (msg: string) => void, logInfo?: (msg: string) => void): { [key: string]: any } {
+export function mergeEnvironments<T extends StringMap>(cfg: T, cfgEnv?: Partial<T>, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
   if (!cfgEnv) {
     return cfg
   }
@@ -45,10 +47,10 @@ export function mergeEnvironments(cfg: { [key: string]: any }, cfgEnv?: { [key: 
   }
   return conf
 }
-export function mergeEnv(cfg: { [key: string]: any }, env: ProcessEnv, logError?: (msg: string) => void, logInfo?: (msg: string) => void): { [key: string]: any } {
+export function mergeEnv<T extends StringMap>(cfg: T, env: ProcessEnv, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
   return mergeWithPath({ ...cfg }, env, undefined, logError, logInfo)
 }
-export function mergeWithPath(cfg: { [key: string]: any }, env: ProcessEnv, parentPath?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): { [key: string]: any } {
+export function mergeWithPath<T extends StringMap>(cfg: T, env: ProcessEnv, parentPath?: string, logError?: (msg: string) => void, logInfo?: (msg: string) => void): T {
   const conf: any = cfg
   const keys = Object.keys(conf)
   for (const key of keys) {

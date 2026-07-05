@@ -456,6 +456,101 @@ Current implementation does not support:
 
 These features may be added in future versions.
 
+## Comparison with popular libraries
+
+<table>
+  <thead>
+
+
+<tr>
+
+<th>Feature</th>
+
+<th>config-plus</th>
+<th>node-config</th>
+<th>convict</th>
+<th>envalid</th>
+<th>dotenv</th>
+
+</tr>
+  </thead>
+  <tbody>
+
+<tr>
+
+<td>Environment overrides</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+
+<tr>
+
+<td>Nested objects</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+
+<td>Automatic typing</td>
+
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+
+</tr>
+
+
+<tr>
+
+<td>Environment-specific config</td>
+
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+
+</tr>
+
+
+<tr>
+
+<td>Dependencies</td>
+
+<td>None</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Small</td>
+
+</tr>
+
+
+<tr>
+
+<td>Reflection</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+
+</tr>
+
+
+</tbody>
+</table>
+
 ---
 
 ## License
