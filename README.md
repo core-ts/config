@@ -84,7 +84,7 @@ export const config = {
 2. UAT overrides and PRD overrides for the configuration
 
 ```ts
-export const env = {
+export const environments = {
   uat: {
     server: {
       port: 8080,
@@ -129,7 +129,7 @@ export const config = {
 }
 
 // SIT overrides and PRD overrides for the configuration
-export const env = {
+export const environments = {
   uat: {
     server: {
       port: 8080,
@@ -145,7 +145,7 @@ export const env = {
   },
 }
 
-const cfg = merge(config, process.env, env, "prd")
+const cfg = merge(config, process.env, environments, "prd")
 
 ```
 
@@ -172,6 +172,144 @@ Result:
 ```
 
 ---
+
+## Architecture
+```text
+merge()
+    │
+    ├── mergeEnvironments()
+    │
+    └── mergeEnv()
+             │
+             ▼
+        mergeWithPath()
+```
+
+### Type handling
+This is one of the strongest parts.
+
+It automatically converts environment variables based on the existing property's type.
+
+#### Strings
+```text
+"localhost"
+
+↓
+
+HOST="google.com"
+
+↓
+
+"google.com"
+```
+
+#### Numbers
+```text
+8080
+
+↓
+
+PORT=3000
+
+↓
+
+3000
+```
+with validation.
+
+#### Boolean
+```text
+false
+
+↓
+
+SSL=true
+
+↓
+
+true
+```
+
+#### Arrays
+Allows
+```text
+STATUS=["A","B","C"]
+```
+using JSON parsing.
+
+Many libraries don't support arrays.
+
+#### Objects
+Recursive
+```text
+db.user
+
+↓
+
+DB_USER
+```
+
+#### Naming convention
+Environment names become
+```text
+db.host
+
+↓
+
+DB_HOST
+```
+
+and 
+
+```text
+cache.redis.timeout
+
+↓
+
+CACHE_REDIS_TIMEOUT
+```
+
+This is an industry-standard convention
+
+### Configuration acts as schema
+Instead of
+```ts
+{
+    type: Number,
+    default: 8080
+}
+```
+
+simply write
+```ts
+port: 8080
+```
+
+The runtime infers
+```text
+number
+```
+Very elegant.
+
+### No decorators
+
+### Supported Types
+Current implementation supports
+
+- string
+- number
+- boolean
+- object
+- array
+
+#### Not supported
+- ❌ bigint
+- ❌ Date
+- ❌ Map
+- ❌ Set
+- ❌ enum
+- ❌ null override
+- ❌ undefined override
 
 ## API
 
@@ -390,6 +528,11 @@ Result
 ---
 
 ## Example
+- [sql-modular-sample](https://github.com/source-code-template/sql-modular-sample): REST API example with MySQL.
+- [sql-simple-modular-sample](https://github.com/source-code-template/sql-simple-modular-sample): REST API example with Posgres.
+- [mongo-simple-modular-sample](https://github.com/source-code-template/mongo-simple-modular-sample): REST API example with Mongo.
+
+### Quick example:
 
 ```ts
 const defaults = {
@@ -456,6 +599,8 @@ Current implementation does not support:
 
 These features may be added in future versions.
 
+---
+
 ## Comparison with popular libraries
 
 <table>
@@ -475,6 +620,17 @@ These features may be added in future versions.
 </tr>
   </thead>
   <tbody>
+
+<tr>
+
+<td>Size</td>
+<td>~40–80 KB</td>
+<td>~2–3 MB</td>
+<td>~300–500 KB</td>
+<td>~85 KB</td>
+<td>~80 KB</td>
+
+</tr>
 
 <tr>
 
@@ -547,9 +703,29 @@ These features may be added in future versions.
 
 </tr>
 
-
 </tbody>
 </table>
+
+---
+
+## Why config-plus
+Many configuration libraries include features such as file loading, validation, schemas, plugins, and dependency injection. While powerful, they can be unnecessary for smaller projects or reusable libraries.
+
+config-plus focuses on one job:
+- merging configuration objects,
+- applying environment-specific overrides,
+- overriding values from process.env
+
+The result is a tiny, dependency-free utility that is easy to understand, easy to maintain, and suitable for applications, libraries, and frameworks.
+
+## Recommended Usage
+
+This library is best suited for:
+- Microservices
+- REST APIs
+- Batch jobs
+- Internal backend applications
+- Docker/Kubernates deployments
 
 ---
 
