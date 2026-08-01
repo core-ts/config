@@ -41,6 +41,9 @@ export function mergeEnvironments<T extends StringMap>(cfg: T, cfgEnv?: Partial<
       default:
         if (o2 !== conf[key]) {
           conf[key] = o2
+          if (logInfo) {
+            logInfo(`Override ${key} with value ${toString(o2)} from environment configuration`)
+          }
         }
         break
     }

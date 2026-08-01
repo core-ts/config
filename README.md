@@ -29,6 +29,26 @@ Environment variables always have the highest priority
 - Environment overrides (SIT, UAT, PRD)
 - Environment variables overrides (process.env)
 
+### Examples:
+
+#### REST API
+- [sql-modular-sample](https://github.com/source-code-template/sql-modular-sample): REST API with MySQL.
+- [mongo-simple-modular-sample](https://github.com/source-code-template/mongo-simple-modular-sample): REST API with MongoDB.
+
+#### Import Data
+- [import-sample](https://github.com/typescript-sample/import-sample): import a fix-length file to MySql.
+- [import-csv-sample](https://github.com/typescript-sample/import-csv-sample): import a CSV file to MySql.
+
+#### Export Data
+- [postgres-export-sample](https://github.com/typescript-sample/postgres-export-sample): export data from Postgres to CSV.
+- [mssql-export-sample](https://github.com/typescript-sample/mssql-export-sample): export data from MS SQL to CSV.
+- [mysql-export-sample](https://github.com/typescript-sample/mysql-export-sample): export data from MySql to CSV.
+
+#### Message Queue
+- [rabbitmq-sample](https://github.com/typescript-tutorial/rabbitmq-sample): An example to consume message from rabbitmq.
+- [activemq-sample](https://github.com/typescript-tutorial/activemq-sample): An example to consume message from activemq.
+- [nats-sample](https://github.com/typescript-tutorial/nats-sample): An example to consume message from nats.
+
 ---
 
 ## Strengths
